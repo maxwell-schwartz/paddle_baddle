@@ -13,6 +13,9 @@ var floor_height = canvas.height-pu_size;
 var right_press = false;
 var left_press = false;
 
+var level = 1;
+var dark_blue = false;
+
 var p1_power_up1 = 0;
 var p1_power_up2 = 0;
 var p1_power_up3 = 0;
@@ -98,6 +101,83 @@ function keyUpHandler(e) {
     else if(e.keyCode == 51) {
         if (p1_power_up3 > 0) {
             p1_pu3_on = true;
+        }
+    }
+}
+
+// http://stackoverflow.com/questions/17130395/canvas-html5-real-mouse-position
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
+}
+
+canvas.addEventListener("mousedown", doMouseDown, false);
+canvas.addEventListener("mouseup", doMouseUp, false);
+function doMouseDown(event) {
+    var pos = getMousePos(canvas, event);
+    var mx = pos.x;
+    var my = pos.y;
+    if (mode == 1) {
+        if (mx >= canvas.width-canvas.width/4-250 && mx <= canvas.width-canvas.width/4-150 && my >= canvas.height/2+20 && my <= canvas.height/2+70) {
+            level = 1;
+        }
+        else if (mx >= canvas.width-canvas.width/4-125 && mx <= canvas.width-canvas.width/4-25 && my >= canvas.height/2+20 && my <= canvas.height/2+70) {
+            level = 2;
+        }
+        else if (mx >= canvas.width-canvas.width/4+25 && mx <= canvas.width-canvas.width/4+125 && my >= canvas.height/2+20 && my <= canvas.height/2+70) {
+            level = 3;
+        }
+        else if (mx >= canvas.width-canvas.width/4+150 && mx <= canvas.width-canvas.width/4+250 && my >= canvas.height/2+20 && my <= canvas.height/2+70) {
+            level = 4;
+        }
+    }
+    else if (mode == 3) {
+        if (mx >= canvas.width-canvas.width/4-100 && mx <= canvas.width-canvas.width/4+100 && my >= canvas.height/2+85 && my <= canvas.height/2+135) {
+            dark_blue = true;
+        } else {
+            dark_blue = false;
+        }
+    }
+}
+
+function doMouseUp(event) {
+    var pos = getMousePos(canvas, event);
+    var mx = pos.x;
+    var my = pos.y;
+    if (mode == 3) {
+        if (mx >= canvas.width-canvas.width/4-100 && mx <= canvas.width-canvas.width/4+100 && my >= canvas.height/2+85 && my <= canvas.height/2+135) {
+            dark_blue = false;
+            p1_power_up1 = 0;
+            p1_power_up2 = 0;
+            p1_power_up3 = 0;
+            p2_power_up1 = 0;
+            p2_power_up2 = 0;
+            p2_power_up3 = 0;
+            p1_pu1_on = false;
+            p1_pu2_on = false;
+            p1_pu3_on = false;
+            p1_paddle.x = (p1_paddle.l_bound+p1_paddle.r_bound)/2;
+            p2_paddle.x = (p2_paddle.l_bound+p2_paddle.r_bound)/2;
+            for (var x=0; x<p1_enemies.length; x++) {
+                p1_enemies[x].freeze_counter = 0;
+                p1_enemies[x].speed_counter = 0;
+                p1_enemies[x].reset();
+            }
+            for (var y=0; y<p1_enemies.length; y++) {
+                p2_enemies[y].freeze_counter = 0;
+                p2_enemies[y].speed_counter = 0;
+                p2_enemies[y].reset();
+            }
+            p1_ball.lives = 5;
+            p2_ball.lives = 5;
+            p1_ball.reset();
+            p2_ball.reset();
+            mode = 1;
+        } else {
+            dark_blue = false;
         }
     }
 }
@@ -351,11 +431,37 @@ function paddleMove() {
         p1_paddle.x -= 7;
     }
     if (p2_paddle.x+paddle_w/2 < p2_ball.x && p2_paddle.x < p2_paddle.r_bound) {
-    	p2_paddle.x += 4;
+    	switch(level) {
+            case 1:
+                p2_paddle.x += 2;
+                break;
+            case 2:
+                p2_paddle.x += 4;
+                break;
+            case 3:
+                p2_paddle.x += 4.3;
+                break;
+            case 4:
+                p2_paddle.x = p2_ball.x-p2_paddle.w/2;
+                break;
+        }
     	p2_paddle.r = true;
     	p2_paddle.l = false;
     } else if (p2_paddle.x+paddle_w/2 > p2_ball.x && p2_paddle.x > p2_paddle.l_bound) {
-    	p2_paddle.x -= 4;
+    	switch(level) {
+            case 1:
+                p2_paddle.x -= 2;
+                break;
+            case 2:
+                p2_paddle.x -= 4;
+                break;
+            case 3:
+                p2_paddle.x -= 4.3;
+                break;
+            case 4:
+                p2_paddle.x = p2_ball.x-p2_paddle.w/2;
+                break;
+        }
     	p2_paddle.r = false;
     	p2_paddle.l = true;
     } else {
@@ -512,12 +618,64 @@ function startScreen() {
     ctx.fillStyle = "Red";
     ctx.font = "bold 30px Verdana";
     ctx.fillText("SPACE to start.", canvas.width/4, canvas.height/2+135);
+    ctx.textAlign = "start";
+    ctx.font = "20px Verdana";
+    ctx.fillText("Your lives", wall_w*2, 25);
+    ctx.fillText("Opponent's lives", canvas.width/2+wall_w*2, 25);
+    drawWall();
+    ctx.textAlign = "center";
     ctx.font = "20px Verdana";
     ctx.fillStyle = "Indigo";
-    ctx.fillText("1 = Big Ball.", canvas.width-canvas.width/4, canvas.height/2+25);
-    ctx.fillText("2 = Freeze Your Blocks.", canvas.width-canvas.width/4, canvas.height/2+50);
-    ctx.fillText("3 = Faster Enemy Blocks.", canvas.width-canvas.width/4, canvas.height/2+75);
-    drawWall();
+    ctx.fillText("Your powerups are down here.", canvas.width/4, canvas.height-pu_size/2);
+    ctx.fillText("Enemy powerups are down here.", canvas.width-canvas.width/4, canvas.height-pu_size/2);
+    ctx.font = "bold 25px Verdana";
+    ctx.fillStyle = "Black";
+    ctx.fillText("Level?", canvas.width-canvas.width/4, canvas.height/2);
+    ctx.beginPath();
+    ctx.rect(canvas.width-canvas.width/4-250, canvas.height/2+20, 100, 50);
+    if (level == 1) {
+        ctx.fillStyle = "Magenta";
+    } else {
+        ctx.fillStyle = "LightBlue";
+    }
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.rect(canvas.width-canvas.width/4-125, canvas.height/2+20, 100, 50);
+    if (level == 2) {
+        ctx.fillStyle = "Magenta";
+    } else {
+        ctx.fillStyle = "LightBlue";
+    }
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.rect(canvas.width-canvas.width/4+25, canvas.height/2+20, 100, 50);
+    if (level == 3) {
+        ctx.fillStyle = "Magenta";
+    } else {
+        ctx.fillStyle = "LightBlue";
+    }
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.rect(canvas.width-canvas.width/4+150, canvas.height/2+20, 100, 50);
+    if (level == 4) {
+        ctx.fillStyle = "Magenta";
+    } else {
+        ctx.fillStyle = "LightBlue";
+    }
+    ctx.fill();
+    ctx.closePath();
+    ctx.textAlign = "start";
+    ctx.fillStyle = "Black";
+    ctx.fillText("Easy", canvas.width-canvas.width/4-235, canvas.height/2+50);
+    ctx.font = "bold 20px Verdana";
+    ctx.fillText("Medium", canvas.width-canvas.width/4-120, canvas.height/2+50);
+    ctx.font = "bold 25px Verdana";
+    ctx.fillText("Hard", canvas.width-canvas.width/4+40, canvas.height/2+50);
+    ctx.font = "bold 15px Verdana";
+    ctx.fillText("Impossible?", canvas.width-canvas.width/4+153, canvas.height/2+50);
 }
 
 function gamePlay() {
@@ -555,7 +713,20 @@ function endScreen() {
         ctx.fillText("Winner! ^_^", canvas.width/4, canvas.height/3);
     }
     ctx.fillStyle = "Red";
-    ctx.fillText("SPACE to play again.", canvas.width/4, canvas.height/2+135);
+    ctx.fillText("SPACE to rematch.", canvas.width/4, canvas.height/2+135);
+    ctx.beginPath();
+    ctx.rect(canvas.width-canvas.width/4-100, canvas.height/2+85, 200, 50);
+    if (dark_blue) {
+        ctx.fillStyle = "DarkBlue";
+    } else {
+        ctx.fillStyle = "LightBlue";
+    }
+    ctx.fill();
+    ctx.closePath();
+    ctx.textAlign = "start";
+    ctx.font = "bold 15px Verdana";
+    ctx.fillStyle = "DarkRed";
+    ctx.fillText("Return to start screen", canvas.width-canvas.width/4-92, canvas.height/2+115);
     drawWall();
 }
 
