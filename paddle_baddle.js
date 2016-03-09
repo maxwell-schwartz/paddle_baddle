@@ -7,6 +7,8 @@ var loser_l = 30;
 var wall_w = 14;
 var paddle_w = 74;
 var en_size = 30;
+var pu_size = 50;
+var floor_height = canvas.height-pu_size;
 
 var right_press = false;
 var left_press = false;
@@ -105,16 +107,26 @@ function Ball (lb, rb, p) {
 	this.r_bound = rb;
 	this.p = p;
     this.lives = 5;
-	this.x = (this.l_bound+this.r_bound)/2;
-	this.y = canvas.height/2;
-	this.x_change = 0;
+    this.radius = 10;
+	this.x = this.p.x+paddle_w/2;
+	this.y = this.p.y-this.radius;
+    var direction = Math.floor(Math.random() * 2);
+    if (direction == 0) {
+        this.x_change = 2;
+    } else {
+        this.x_change = -2;
+    }
 	this.y_change = 4;
-	this.radius = 10;
     this.boost_counter = 0;
 	this.reset = function() {
 		this.x = this.p.x+paddle_w/2;
-		this.y = canvas.height/2;
-		this.x_change = 0;
+        this.y = this.p.y-this.radius;
+        direction = Math.floor(Math.random() * 2);
+		if (direction == 0) {
+            this.x_change = 2;
+        } else {
+            this.x_change = -2;
+        }
 		this.y_change = 4;
         this.boost_counter = 0;
 	}
@@ -158,7 +170,7 @@ function Ball (lb, rb, p) {
                 }
             }
             // floor 
-            else if (this.y+this.radius > canvas.height) {
+            else if (this.y+this.radius > floor_height) {
                 this.reset();
                 if (this.lives > 0) {
                     this.lives -= 1;
@@ -194,7 +206,7 @@ function Paddle (lb, rb) {
 	this.w = paddle_w;
 	this.h = 10;
 	this.x = (this.l_bound+this.r_bound)/2;
-	this.y = canvas.height-10;
+	this.y = floor_height-this.h;
 	this.r = false;
 	this.l = false;
 	this.draw = function() {
@@ -222,7 +234,7 @@ function Enemy (lb, rb, ball) {
         this.state = Math.floor(Math.random() * 20) + 1;
     };
     this.move = function() {
-        if (this.y > canvas.height) {
+        if (this.y > floor_height) {
             if (this.b.lives > 0) {
                 this.b.lives -= 1;
             }
@@ -413,48 +425,42 @@ function powerUpCheck() {
 }
 
 function powerUpDisplay() {
-    for (var i=8; i<p1_power_up1+8; i++){
-        ctx.beginPath();
-        ctx.rect(3, wall_w*i, wall_w/2, wall_w/2);
-        ctx.fillStyle = "DeepPink";
-        ctx.fill();
-        ctx.closePath();
-    }
-    for (var j=14; j<p1_power_up2+14; j++){
-        ctx.beginPath();
-        ctx.rect(3, wall_w*j, wall_w/2, wall_w/2);
-        ctx.fillStyle = "MediumSlateBlue";
-        ctx.fill();
-        ctx.closePath();
-    }
-    for (var k=20; k<p1_power_up3+20; k++){
-        ctx.beginPath();
-        ctx.rect(3, wall_w*k, wall_w/2, wall_w/2);
-        ctx.fillStyle = "MediumSpringGreen";
-        ctx.fill();
-        ctx.closePath();
-    }
-    for (var x=8; x<p2_power_up1+8; x++){
-        ctx.beginPath();
-        ctx.rect(canvas.width-3-wall_w/2, wall_w*x, wall_w/2, wall_w/2);
-        ctx.fillStyle = "DeepPink";
-        ctx.fill();
-        ctx.closePath();
-    }
-    for (var y=14; y<p2_power_up2+14; y++){
-        ctx.beginPath();
-        ctx.rect(canvas.width-3-wall_w/2, wall_w*y, wall_w/2, wall_w/2);
-        ctx.fillStyle = "MediumSlateBlue";
-        ctx.fill();
-        ctx.closePath();
-    }
-    for (var z=20; z<p2_power_up3+20; z++){
-        ctx.beginPath();
-        ctx.rect(canvas.width-3-wall_w/2, wall_w*z, wall_w/2, wall_w/2);
-        ctx.fillStyle = "MediumSpringGreen";
-        ctx.fill();
-        ctx.closePath();
-    }
+    ctx.beginPath();
+    ctx.rect(wall_w+pu_size, floor_height, pu_size, pu_size);
+    ctx.rect(canvas.width/4-pu_size/2, floor_height, pu_size, pu_size);
+    ctx.rect(canvas.width/2-wall_w/2-pu_size*2, floor_height, pu_size, pu_size);
+    ctx.rect(canvas.width/2+wall_w/2+pu_size, floor_height, pu_size, pu_size);
+    ctx.rect(canvas.width-canvas.width/4-pu_size/2, floor_height, pu_size, pu_size);
+    ctx.rect(canvas.width-wall_w/2-pu_size*2, floor_height, pu_size, pu_size);
+    ctx.fillStyle = "LightPink";
+    ctx.fill();
+    ctx.closePath();
+    ctx.textAlign = "end";
+    ctx.font = "bold 20px Verdana";
+    ctx.fillStyle = "FireBrick";
+    ctx.fillText("1", wall_w+pu_size-10, canvas.height-pu_size/4);
+    ctx.fillText("2", canvas.width/4-pu_size/2-10, canvas.height-pu_size/4);
+    ctx.fillText("3", canvas.width/2-wall_w/2-pu_size*2-10, canvas.height-pu_size/4);
+    ctx.textAlign = "start";
+    ctx.font = "10px Verdana";
+    ctx.fillStyle = "Black";
+    ctx.fillText("Big Ball", wall_w+pu_size+5, floor_height+10);
+    ctx.fillText("Freeze", canvas.width/4-pu_size/2+5, floor_height+10);
+    ctx.fillText("Yours", canvas.width/4-pu_size/2+5, floor_height+20);
+    ctx.fillText("Speed", canvas.width/2-wall_w/2-pu_size*2+5, floor_height+10);
+    ctx.fillText("Enemy's", canvas.width/2-wall_w/2-pu_size*2+5, floor_height+20);
+    ctx.fillText("Big Ball", canvas.width/2+wall_w/2+pu_size+5, floor_height+10);
+    ctx.fillText("Freeze", canvas.width-canvas.width/4-pu_size/2+5, floor_height+10);
+    ctx.fillText("Yours", canvas.width-canvas.width/4-pu_size/2+5, floor_height+20);
+    ctx.fillText("Speed", canvas.width-wall_w/2-pu_size*2+5, floor_height+10);
+    ctx.fillText("Enemy's", canvas.width-wall_w/2-pu_size*2+5, floor_height+20);
+    ctx.font = "bold 20px Verdana";
+    ctx.fillText(p1_power_up1, wall_w+pu_size+15, floor_height+45);
+    ctx.fillText(p1_power_up2, canvas.width/4-pu_size/2+15, floor_height+45);
+    ctx.fillText(p1_power_up3, canvas.width/2-wall_w/2-pu_size*2+15, floor_height+45);
+    ctx.fillText(p2_power_up1, canvas.width/2+wall_w/2+pu_size+15, floor_height+45);
+    ctx.fillText(p2_power_up2, canvas.width-canvas.width/4-pu_size/2+15, floor_height+45);
+    ctx.fillText(p2_power_up3, canvas.width-wall_w/2-pu_size*2+15, floor_height+45);
 }
 
 function displayLives() {
@@ -466,7 +472,12 @@ function displayLives() {
 }
 
 function drawWall() {
-	ctx.beginPath();
+    // floor
+    ctx.beginPath();
+    ctx.rect(0, floor_height, canvas.width, canvas.height);
+    ctx.fillStyle = "LightGreen";
+    ctx.fill();
+    ctx.beginPath();
     // left
     ctx.rect(0, 0, wall_w, canvas.height);
     // center
@@ -502,16 +513,14 @@ function startScreen() {
     ctx.font = "bold 30px Verdana";
     ctx.fillText("SPACE to start.", canvas.width/4, canvas.height/2+135);
     ctx.font = "20px Verdana";
-    ctx.fillStyle = "DeepPink";
+    ctx.fillStyle = "Indigo";
     ctx.fillText("1 = Big Ball.", canvas.width-canvas.width/4, canvas.height/2+25);
-    ctx.fillStyle = "MediumSlateBlue";
     ctx.fillText("2 = Freeze Your Blocks.", canvas.width-canvas.width/4, canvas.height/2+50);
-    ctx.fillStyle = "MediumSpringGreen";
     ctx.fillText("3 = Faster Enemy Blocks.", canvas.width-canvas.width/4, canvas.height/2+75);
+    drawWall();
 }
 
 function gamePlay() {
-    powerUpDisplay();
     powerUpCheck();
     p1_ball.draw();
     p2_ball.draw();
@@ -525,6 +534,8 @@ function gamePlay() {
         p2_enemies[y].draw();
     }
     displayLives();
+    drawWall();
+    powerUpDisplay();
 }
 
 function endScreen() {
@@ -545,11 +556,11 @@ function endScreen() {
     }
     ctx.fillStyle = "Red";
     ctx.fillText("SPACE to play again.", canvas.width/4, canvas.height/2+135);
+    drawWall();
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawWall();
 	switch(mode) {
         case 1:
             startScreen();
