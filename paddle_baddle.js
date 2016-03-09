@@ -349,40 +349,27 @@ function Enemy (lb, rb, ball) {
         if (Math.abs(this.y+en_size/2-this.b.y) <= en_size/2+this.b.radius && Math.abs(this.x+en_size/2-this.b.x) <= en_size/2+this.b.radius) {
             // right side of ball, left side of block
             if (this.b.x < this.x) {
-                // ball should bounce off even if it has no side velocity
-                if (this.b.x_change == 0) {
-                    this.powerUp();
-                    this.reset();
-                    this.b.x_change = -2;
-                } else {
-                    this.powerUp();
-                    this.reset();
-                    this.b.x_change = -this.b.x_change;
-                }
+                this.powerUp();
+                this.reset();
+                this.b.x_change = -Math.abs(this.b.x_change);
             }
             // left side of ball, right side of block
             else if (this.b.x > this.x+en_size) {
-                if (this.b.x_change == 0) {
-                    this.powerUp();
-                    this.reset();
-                    this.b.x_change = 2;
-                } else {
-                    this.powerUp();
-                    this.reset();
-                    this.b.x_change = -this.b.x_change;
-                }
+                this.powerUp();
+                this.reset();
+                this.b.x_change = Math.abs(this.b.x_change);
             }
             // bottom of ball, top of block
             else if (this.b.y < this.y) {
                 this.powerUp();
                 this.reset();
-                this.b.y_change = -this.b.y_change;
+                this.b.y_change = -Math.abs(this.b.y_change);
             }
             // top of ball, bottom of block
             else if (this.b.y > this.y+en_size) {
                 this.powerUp();
                 this.reset();
-                this.b.y_change = -this.b.y_change;
+                this.b.y_change = Math.abs(this.b.y_change);
             }
         }
     };
@@ -674,8 +661,8 @@ function startScreen() {
     ctx.fillText("Medium", canvas.width-canvas.width/4-120, canvas.height/2+50);
     ctx.font = "bold 25px Verdana";
     ctx.fillText("Hard", canvas.width-canvas.width/4+40, canvas.height/2+50);
-    ctx.font = "bold 15px Verdana";
-    ctx.fillText("Impossible?", canvas.width-canvas.width/4+153, canvas.height/2+50);
+    ctx.font = "bold 12px Verdana";
+    ctx.fillText("Impossible?", canvas.width-canvas.width/4+158, canvas.height/2+50);
 }
 
 function gamePlay() {
