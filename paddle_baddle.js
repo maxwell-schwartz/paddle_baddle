@@ -40,10 +40,13 @@ function keyDownHandler(e) {
         left_press = true;
         p1_paddle.l = true;
     }
+
+	//space
     else if (e.keyCode == 32) {
         if (mode == 1) {
             mode = 2;
         }
+		// Resetting game
         else if (mode == 3) {
             p1_power_up1 = 0;
             p1_power_up2 = 0;
@@ -56,6 +59,8 @@ function keyDownHandler(e) {
             p1_pu3_on = false;
             p1_paddle.x = (p1_paddle.l_bound+p1_paddle.r_bound)/2;
             p2_paddle.x = (p2_paddle.l_bound+p2_paddle.r_bound)/2;
+			
+			// array of enemies not frozen/sped up
             for (var x=0; x<p1_enemies.length; x++) {
                 p1_enemies[x].freeze_counter = 0;
                 p1_enemies[x].speed_counter = 0;
@@ -188,8 +193,8 @@ function Ball (lb, rb, p) {
 	this.p = p;
     this.lives = 5;
     this.radius = 10;
-	this.x = this.p.x+paddle_w/2;
-	this.y = this.p.y-this.radius;
+	this.x = this.p.x + paddle_w/2;
+	this.y = this.p.y - this.radius;
     var direction = Math.floor(Math.random() * 2);
     if (direction == 0) {
         this.x_change = 2;
@@ -228,6 +233,7 @@ function Ball (lb, rb, p) {
         }
         // ceiling collision
     	if (this.y-this.radius <= 0) {
+		// doesn't get caught in the ceiling with a larger ball
     		this.y_change = Math.abs(this.y_change);
     	}
     	if (this.y+this.radius >= this.p.y) {
@@ -351,7 +357,7 @@ function Enemy (lb, rb, ball) {
             if (this.b.x < this.x) {
                 this.powerUp();
                 this.reset();
-                this.b.x_change = -Math.abs(this.b.x_change);
+                this.b.x_change = -(Math.abs(this.b.x_change));
             }
             // left side of ball, right side of block
             else if (this.b.x > this.x+en_size) {
@@ -363,7 +369,7 @@ function Enemy (lb, rb, ball) {
             else if (this.b.y < this.y) {
                 this.powerUp();
                 this.reset();
-                this.b.y_change = -Math.abs(this.b.y_change);
+                this.b.y_change = -(Math.abs(this.b.y_change));
             }
             // top of ball, bottom of block
             else if (this.b.y > this.y+en_size) {
@@ -398,8 +404,8 @@ function Enemy (lb, rb, ball) {
     };
 }
 
-var p1_paddle = new Paddle(wall_w, canvas.width/2-wall_w/2-paddle_w);
-var p2_paddle = new Paddle(canvas.width/2+wall_w/2, canvas.width-paddle_w-wall_w);
+var p1_paddle = new Paddle(wall_w, canvas.width / 2 - wall_w / 2-paddle_w);
+var p2_paddle = new Paddle(canvas.width / 2 + wall_w / 2, canvas.width-paddle_w-wall_w);
 var p1_ball = new Ball(wall_w/2, canvas.width/2, p1_paddle);
 var p2_ball = new Ball(canvas.width/2, canvas.width-wall_w/2, p2_paddle);
 var p1_enemies = [];
@@ -408,7 +414,7 @@ for (var i=0; i<10; i++) {
     p1_enemies[i] = new Enemy(wall_w, canvas.width/2-wall_w/2, p1_ball);
 }
 for (var j=0; j<10; j++) {
-    p2_enemies[j] = new Enemy(canvas.width/2+wall_w/2, canvas.width-en_size-wall_w, p2_ball);
+    p2_enemies[j] = new Enemy(canvas.width / 2 + wall_w / 2, canvas.width-en_size-wall_w, p2_ball);
 }
 
 function paddleMove() {
@@ -434,7 +440,7 @@ function paddleMove() {
         }
     	p2_paddle.r = true;
     	p2_paddle.l = false;
-    } else if (p2_paddle.x+paddle_w/2 > p2_ball.x && p2_paddle.x > p2_paddle.l_bound) {
+    } else if (p2_paddle.x+paddle_w / 2 > p2_ball.x && p2_paddle.x > p2_paddle.l_bound) {
     	switch(level) {
             case 1:
                 p2_paddle.x -= 2;
@@ -620,38 +626,46 @@ function startScreen() {
     ctx.fillText("Level?", canvas.width-canvas.width/4, canvas.height/2);
     ctx.beginPath();
     ctx.rect(canvas.width-canvas.width/4-250, canvas.height/2+20, 100, 50);
+
     if (level == 1) {
         ctx.fillStyle = "Magenta";
     } else {
         ctx.fillStyle = "LightBlue";
     }
+
     ctx.fill();
     ctx.closePath();
     ctx.beginPath();
     ctx.rect(canvas.width-canvas.width/4-125, canvas.height/2+20, 100, 50);
+
     if (level == 2) {
         ctx.fillStyle = "Magenta";
     } else {
         ctx.fillStyle = "LightBlue";
     }
+
     ctx.fill();
     ctx.closePath();
     ctx.beginPath();
-    ctx.rect(canvas.width-canvas.width/4+25, canvas.height/2+20, 100, 50);
+    ctx.rect(canvas.width-canvas.width / 4 + 25, canvas.height / 2 + 20, 100, 50);
+
     if (level == 3) {
         ctx.fillStyle = "Magenta";
     } else {
         ctx.fillStyle = "LightBlue";
     }
+
     ctx.fill();
     ctx.closePath();
     ctx.beginPath();
     ctx.rect(canvas.width-canvas.width/4+150, canvas.height/2+20, 100, 50);
+
     if (level == 4) {
         ctx.fillStyle = "Magenta";
     } else {
         ctx.fillStyle = "LightBlue";
     }
+
     ctx.fill();
     ctx.closePath();
     ctx.textAlign = "start";
@@ -672,25 +686,28 @@ function gamePlay() {
     paddleMove();
     p1_paddle.draw();
     p2_paddle.draw();
+
     for (var x=0; x<p1_enemies.length; x++) {
         p1_enemies[x].draw();
     }
+
     for (var y=0; y<p2_enemies.length; y++) {
         p2_enemies[y].draw();
     }
+
     displayLives();
     drawWall();
     powerUpDisplay();
 }
 
 function endScreen() {
-    if (loser_l < canvas.width/2) {
+    if (loser_l < canvas.width / 2) {
         ctx.textAlign = "center";
         ctx.font = "bold 40px Verdana";
         ctx.fillStyle = "DarkRed";
-        ctx.fillText("Loser :(", canvas.width/4, canvas.height/3);
+        ctx.fillText("Loser :(", canvas.width / 4, canvas.height / 3);
         ctx.fillStyle = "DarkBlue";
-        ctx.fillText("Winner! ^_^", canvas.width-canvas.width/4, canvas.height/3);
+        ctx.fillText("Winner! ^_^", canvas.width-canvas.width / 4, canvas.height / 3);
     } else {
         ctx.textAlign = "center";
         ctx.font = "bold 40px Verdana";
@@ -703,11 +720,13 @@ function endScreen() {
     ctx.fillText("SPACE to rematch.", canvas.width/4, canvas.height/2+135);
     ctx.beginPath();
     ctx.rect(canvas.width-canvas.width/4-100, canvas.height/2+85, 200, 50);
+
     if (dark_blue) {
         ctx.fillStyle = "DarkBlue";
     } else {
         ctx.fillStyle = "LightBlue";
     }
+
     ctx.fill();
     ctx.closePath();
     ctx.textAlign = "start";
@@ -719,6 +738,7 @@ function endScreen() {
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 	switch(mode) {
         case 1:
             startScreen();
